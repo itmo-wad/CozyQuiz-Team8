@@ -85,7 +85,7 @@
         nextAnswerNum = htmlAnswer.length
         lastAnswer = htmlAnswer[nextAnswerNum-1]
         newAnswer = lastAnswer.outerHTML.replaceAll("correct"+(nextAnswerNum-1), "correct"+(nextAnswerNum)).replaceAll("Answer "+(nextAnswerNum), "Answer "+(nextAnswerNum+1))
-        document.getElementById('answerRow').innerHTML += newAnswer
+        document.getElementById('answerRow').insertAdjacentHTML('beforeend', newAnswer)
       }
     </script>
   </body>

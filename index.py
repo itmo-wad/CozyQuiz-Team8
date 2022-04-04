@@ -211,7 +211,8 @@ def showRoom(room_id):
     if room is None:
         flash('Room not found', 'danger')
         return redirect(url_for('home'))
-    questions = db.questions.find({"room_id": room_id})
+    questions = db.questions.find({"roomId": room_id})
+    print("questions: ", questions)
     return render_template("room.html", room=room, questions=questions)
 
 @app.route('/rooms/<string:room_id>/questions/new', methods=['POST', 'GET'])
