@@ -238,7 +238,7 @@ def newQuestion(room_id):
         questions = list(db.questions.find({}))
         return render_template('newQuestion.html', questions=questions)
 
-# IDK if its
+# IDK if its working
 @app.route('/questions/delete/<id>', methods=["POST"])
 def deleteQuestion(id=0):
     username = getLoggedUsername()
