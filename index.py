@@ -29,6 +29,7 @@ def checkPassword(username, password):
             return True
     return False
 
+
 def getLoggedUsername():
     if 'logged' in session:
         user = findUserById(session['logged'])
@@ -37,8 +38,10 @@ def getLoggedUsername():
         session.pop('logged', None)
     return ''
 
+
 def findUserById(id):
     return db.users.find_one(ObjectId(id))
+
 
 def getProfilePic():
     user = db.users.find_one(ObjectId(session['logged']))
@@ -47,12 +50,15 @@ def getProfilePic():
             return url_for('uploadedFile', filename=user['profile_pic'])
     return 'static/icon.png'
 
+
 def allowedFile(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route('/')
 def home():
     return render_template('home.html')
+
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -68,6 +74,7 @@ def login():
             return redirect(url_for('myProfile'))
         flash('Login Error', 'danger')
         return redirect(request.url)
+
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
@@ -85,9 +92,11 @@ def signup():
         if password == '':
             flash('Invalid Password', 'danger')
             return redirect(request.url)
-        db.users.insert_one({"username": username, "password": generate_password_hash(password), "profile_pic": ''})
+        db.users.insert_one({"username": username, "password": generate_password_hash(password),
+                             "profile_pic": ''})
         flash('Account Created!', 'success')
         return redirect('/')
+
 
 @app.route('/myProfile')
 def myProfile():
@@ -96,11 +105,13 @@ def myProfile():
         return render_template("myProfile.html", username=username, profilePic=getProfilePic())
     return redirect(url_for('login'))
 
+
 @app.route('/logout')
 def logout():
     if 'logged' in session:
         session.pop('logged', None)
     return redirect('/')
+
 
 @app.route('/changePassword', methods=["GET", "POST"])
 def changePassword():
@@ -122,11 +133,13 @@ def changePassword():
             if oldPassword == newPassword:
                 flash('New Password must be different from Old Password', 'danger')
                 return redirect(request.url)
-            db.users.update_one({"username": username}, {"$set": {"password": generate_password_hash(newPassword)}})
+            db.users.update_one({"username": username}, {
+                                "$set": {"password": generate_password_hash(newPassword)}})
             flash('Password Changed', 'success')
             return redirect(url_for('myProfile'))
         flash('Invalid Old Password', 'danger')
         return redirect(request.url)
+
 
 @app.route('/updateProfilePic', methods=['GET', 'POST'])
 def uploadProfilePic():
@@ -138,33 +151,82 @@ def uploadProfilePic():
         if 'file' not in request.files:
             flash('No file part', 'danger')
             return redirect(request.url)
-            
+
         file = request.files['file']
         if file.filename == '':
             flash('No selected file', 'danger')
             return redirect(request.url)
-            
+
         if not allowedFile(file.filename):
             flash('Invalid file extension', 'danger')
             return redirect(request.url)
-            
+
         if file and allowedFile(file.filename):
             extension = file.filename.rsplit('.', 1)[1].lower()
             filename = secure_filename(session['logged'] + '.' + extension)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            db.users.update_one({"username": username}, {"$set": {"profile_pic": filename}})
+            db.users.update_one({"username": username},
+                                {"$set": {"profile_pic": filename}})
             flash('Your profile pic was successfully updated!', 'success')
             return redirect(url_for('myProfile'))
     return render_template("uploadPic.html")
-       
+
+
 @app.route('/uploads/<filename>')
 def uploadedFile(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+
+@app.route('/questions/new', methods=['POST', 'GET'])
+def newQuestion():
+    username = getLoggedUsername()
+    if username == '':
+        flash('Please, login first', 'danger')
+        return redirect(url_for('login'))
+
+    if request.method == 'GET':
+        questions = list(db.questions.find({}))
+        return render_template('newQuestion.html', questions=questions)
+
+    else:
+        quiz_question = request.form.get("question")
+        quiz_answer1 = request.form.get("answer1")
+        quiz_answer2 = request.form.get("answer2")
+        db.questions.insert_one({
+            "room": "",
+            "text": quiz_question,
+            "text1": quiz_answer1,
+            "color1": '#03c04A',
+            "correct1": True,
+            "text2": quiz_answer2,
+            "color2": '#D21404',
+            "correct2": False
+        })
+        flash("Quiz question added")
+        questions = list(db.questions.find({}))
+        return render_template('newQuestion.html', questions=questions)
+
+
+@app.route('/questions/delete/<id>', methods=["POST"])
+def deleteQuestion(id=0):
+    username = getLoggedUsername()
+    if username == '':
+        flash('Please, login first', 'danger')
+        return redirect(url_for('login'))
+
+    if request.method == "POST":
+        print(id)
+        if id != 0:
+            db.questions.delete_one({"_id": ObjectId(id)})
+            return redirect('/questions/new')
+        return redirect('/questions/new')
+
+
 if __name__ == '__main__':
     db.users.drop()
 
-    db.users.insert_one({"username": "user", "password": generate_password_hash('123'), "profile_pic": ''})
+    db.users.insert_one(
+        {"username": "123", "password": generate_password_hash('123'), "profile_pic": ''})
     # db.rooms.insert_one({"owner": 'username of the owner'})
     # db.questions.insert_one({"room": "id of the room","text": 'A question?', "answers": [{"text": 'text for the answer 1', "color": 'hex code for a answer', "correct": True}, {"text": 'text for the answer 2', "color": 'hex code for a answer', "correct": False}]})
     # db.results.insert_one({"user": "a username", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <div class="card mx-auto col-8 mb-4 d-flex p-3">
+    <h2 class="text-center">Add Question</h2>
+    <form class="card-body mx-auto flex-column justify-content-center align-items-center" action="/newQuiz" method="POST">
+      <input class="mb-2" type="text" name="question" placeholder="Question"><br>
+      <br>First answer need to be True<br>
+      <input class="mb-4" type="text" name="answer1" placeholder="Answer1"><br>
+      <br> Second answer need to be False<br>
+      <input class="mb-4" type="text" name="answer2" placeholder="Answer2"><br>
+      <div class="d-flex">
+        <button class="mx-auto btn btn-outline-secondary" type="submit">Add</button>
+      </div>
+    </form>
+  </div>
+
+  {% for question in questions %}
+  <ul>
+    <li>{{ question._id }}</li>
+    <form action="/newQuiz/delete/{{question._id}}" method="POST">
+      <input type="submit" name="delete" value="delete">
+    </form>
+    question:
+    <li>{{ question.text }}</li>
+    answer 1 True:
+    <li>{{ question.text1 }}</li>
+    <li>{{ question.correct1 }}</li>
+    answer 2 False:
+    <li>{{ question.text2 }}</li>
+    <li>{{ question.correct2 }}</li>
+  </ul>
+  {% endfor %}
+{% endblock %}
