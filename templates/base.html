@@ -39,7 +39,7 @@
             </li>
             {% if 'logged' in session %}
               <li class="nav-item mx-2">
-                <a class="nav-link" href="#">New Quiz</a>
+                <a class="nav-link" href="{{ url_for('createQuizVerification') }}">New Quiz</a>
               </li>
               <li class="nav-item mx-2">
                 <a class="nav-link" href="{{ url_for('newQuestion') }}">New Question</a>

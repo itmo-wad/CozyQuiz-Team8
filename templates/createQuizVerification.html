@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card mx-auto border-secondary col-8 mb-4 d-flex p-3">
+  <h2 class="text-center">Are you sure you want to create a new Quiz?</h2>
+  <div class="d-flex" >
+    <button class="mx-auto btn btn-outline-secondary"  type="button" onclick="document.location='/createQuiz'">Yes</button>
+  </div>
+  <hr>
+  <div class="d-flex">
+    <button class="mx-auto btn btn-outline-secondary"  type="button" onclick="document.location='/'">No</button>
+  </div>
+
+</div>
+{% endblock %}
