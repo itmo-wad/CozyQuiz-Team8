@@ -51,6 +51,12 @@ def getProfilePic():
     return 'static/icon.png'
 
 
+def getCorrectOrWrong(i, keys):
+    if f"correct{i}" in keys:
+        return True
+    return False
+
+
 def allowedFile(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -179,29 +185,25 @@ def uploadedFile(filename):
 
 @app.route('/questions/new', methods=['POST', 'GET'])
 def newQuestion():
-    username = getLoggedUsername()
-    if username == '':
-        flash('Please, login first', 'danger')
-        return redirect(url_for('login'))
+    # username = getLoggedUsername()
+    # if username == '':
+    #     flash('Please, login first', 'danger')
+    #     return redirect(url_for('login'))
 
     if request.method == 'GET':
         questions = list(db.questions.find({}))
         return render_template('newQuestion.html', questions=questions)
 
     else:
-        quiz_question = request.form.get("question")
-        quiz_answer1 = request.form.get("answer1")
-        quiz_answer2 = request.form.get("answer2")
-        db.questions.insert_one({
-            "room": "",
-            "text": quiz_question,
-            "text1": quiz_answer1,
-            "color1": '#03c04A',
-            "correct1": True,
-            "text2": quiz_answer2,
-            "color2": '#D21404',
-            "correct2": False
-        })
+        answers = request.form.getlist('answer')
+        question = request.form.get('questionText')
+        bgColors = request.form.getlist('answerBgColor')
+        txtColors = request.form.getlist('answerTextColor')
+        keys = request.form.keys()
+        answerList = []
+        for i in range(len(answers)):
+            answerList.append({'text': answers[i], 'bgColor': bgColors[i], 'textColor': txtColors[i], 'correct': getCorrectOrWrong(i, keys)})
+        db.questions.insert_one({'text': question, 'answers': answerList})
         flash("Quiz question added")
         questions = list(db.questions.find({}))
         return render_template('newQuestion.html', questions=questions)
@@ -224,6 +226,7 @@ def deleteQuestion(id=0):
 
 if __name__ == '__main__':
     db.users.drop()
+    db.questions.drop()
 
     db.users.insert_one(
         {"username": "123", "password": generate_password_hash('123'), "profile_pic": ''})
