@@ -103,6 +103,21 @@ def signup():
         flash('Account Created!', 'success')
         return redirect('/')
 
+@app.route('/createQuizVerification')
+def createQuizVerification():
+    username = getLoggedUsername()
+    if username != '':
+        return render_template("createQuizVerification.html")
+    return redirect(url_for('login'))
+@app.route('/createQuiz')
+def createQuiz():
+    username = getLoggedUsername()
+    if username != '':
+        room_info = db.rooms.insert_one({"owner": username})
+        room_id = room_info.inserted_id
+        session['room_id'] = str(room_id)
+        return render_template("createQuiz.html",room_id = room_id)
+    return redirect(url_for('login'))
 
 @app.route('/myProfile')
 def myProfile():

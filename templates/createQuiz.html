@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card mx-auto border-secondary col-8 mb-4 d-flex p-3">
+    <h1>Quiz Created!</h1>
+    <hr>
+    <p>Room ID: {{ room_id }} </p>
+        <button type="button" onclick="document.location='/questions/new'">Add Questions!</button> 
+</div>
+{% endblock %}
