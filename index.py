@@ -198,13 +198,13 @@ def uploadProfilePic():
 def uploadedFile(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-@app.route('/rooms/<id>')
+@app.route('/myRooms')
 def showRooms():
-    # Add question to a room
+    # show a list with the rooms from the logged user
     pass
 
-@app.route('/rooms/<id>/questions/new', methods=['POST', 'GET'])
-def newQuestion(id):
+@app.route('/myRooms/questions/new', methods=['POST', 'GET'])
+def newQuestion(roomId=1):
     # username = getLoggedUsername()
     # if username == '':
     #     flash('Please, login first', 'danger')
@@ -223,7 +223,7 @@ def newQuestion(id):
         answerList = []
         for i in range(len(answers)):
             answerList.append({'text': answers[i], 'bgColor': bgColors[i], 'textColor': txtColors[i], 'correct': getCorrectOrWrong(i, keys)})
-        db.questions.insert_one({'text': question, 'answers': answerList})
+        db.questions.insert_one({'roomId': roomId, 'text': question, 'answers': answerList})
         flash("Quiz question added")
         questions = list(db.questions.find({}))
         return render_template('newQuestion.html', questions=questions)
@@ -248,10 +248,11 @@ def deleteQuestion(id=0):
 if __name__ == '__main__':
     db.users.drop()
     db.questions.drop()
+    db.rooms.drop()
 
     db.users.insert_one(
         {"username": "123", "password": generate_password_hash('123'), "profile_pic": ''})
-    # db.rooms.insert_one({"owner": 'username of the owner', "joined": [{"username" : "gabriel"}]})
+    db.rooms.insert_one({"_id": 1, "owner": '123', "joined": [{"username" : "gabriel"}]})
     # db.questions.insert_one({"room": "id of the room","text": 'A question?', "answers": [{"text": 'text for the answer 1', "color": 'hex code for a answer', "correct": True}, {"text": 'text for the answer 2', "color": 'hex code for a answer', "correct": False}]})
     # db.results.insert_one({"user": "a username", "room": "id_room", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})
 

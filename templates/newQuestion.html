@@ -53,30 +53,12 @@
           </div>
         </div>
       </div>
+      <div class="d-flex mt-2 mb-4">
+        <button class="mx-auto btn btn-link" type="button" id="addAnswer" onclick="appendAnswer()">Add Answer</button>
+      </div>
       <div class="d-flex flex-row-reverse">
         <button class="btn btn-outline-secondary" type="submit">Save Question</button>
       </div>
     </form>
-    <div class="d-flex mt-2 mb-4">
-      <button class="mx-auto btn btn-link" id="addAnswer" onclick="appendAnswer()">Add Answer</button>
-    </div>
-
   </div>
-
-  {% for question in questions %}
-  <ul>
-    <li>{{ question._id }}</li>
-    <form action="/newQuiz/delete/{{question._id}}" method="POST">
-      <input type="submit" name="delete" value="delete">
-    </form>
-    question:
-    <li>{{ question.text }}</li>
-    {% for answer in question.answers %}
-      <li>{{ answer.text }}</li>
-      <li>{{ answer.correct }}</li>
-      <li>{{ answer.bgColor }}</li>
-      <li>{{ answer.textColor }}</li>
-    {% endfor %}
-  </ul>
-  {% endfor %}
 {% endblock %}
