@@ -109,6 +109,7 @@ def createQuizVerification():
     if username != '':
         return render_template("createQuizVerification.html")
     return redirect(url_for('login'))
+
 @app.route('/createQuiz')
 def createQuiz():
     username = getLoggedUsername()
@@ -197,9 +198,13 @@ def uploadProfilePic():
 def uploadedFile(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+@app.route('/rooms/<id>')
+def showRooms():
+    # Add question to a room
+    pass
 
-@app.route('/questions/new', methods=['POST', 'GET'])
-def newQuestion():
+@app.route('/rooms/<id>/questions/new', methods=['POST', 'GET'])
+def newQuestion(id):
     # username = getLoggedUsername()
     # if username == '':
     #     flash('Please, login first', 'danger')
@@ -223,7 +228,7 @@ def newQuestion():
         questions = list(db.questions.find({}))
         return render_template('newQuestion.html', questions=questions)
 
-
+# IDK if its
 @app.route('/questions/delete/<id>', methods=["POST"])
 def deleteQuestion(id=0):
     username = getLoggedUsername()
@@ -239,14 +244,15 @@ def deleteQuestion(id=0):
         return redirect('/questions/new')
 
 
+
 if __name__ == '__main__':
     db.users.drop()
     db.questions.drop()
 
     db.users.insert_one(
         {"username": "123", "password": generate_password_hash('123'), "profile_pic": ''})
-    # db.rooms.insert_one({"owner": 'username of the owner'})
+    # db.rooms.insert_one({"owner": 'username of the owner', "joined": [{"username" : "gabriel"}]})
     # db.questions.insert_one({"room": "id of the room","text": 'A question?', "answers": [{"text": 'text for the answer 1', "color": 'hex code for a answer', "correct": True}, {"text": 'text for the answer 2', "color": 'hex code for a answer', "correct": False}]})
-    # db.results.insert_one({"user": "a username", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})
+    # db.results.insert_one({"user": "a username", "room": "id_room", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})
 
     app.run(host='localhost', port=5000, debug=True)
