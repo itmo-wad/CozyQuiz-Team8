@@ -2,7 +2,7 @@
 {% block content %}
   <div class="card mx-auto col-8 mb-4 d-flex p-3">
     <h2 class="text-center">Add Question</h2>
-    <form class="mb-0 card-body mx-auto flex-column justify-content-center align-items-center" action="{{ url_for('newQuestion') }}" method="POST">
+    <form class="mb-0 card-body mx-auto flex-column justify-content-center align-items-center" action="{{ url_for('newQuestion', room_id=room_id) }}" method="POST">
       <div class="form-floating mb-3">
         <input value="Pergunta padrão??" type="text" class="form-control" id="questionText" name="questionText" placeholder="Question">
         <label for="floatingInput">Question</label>

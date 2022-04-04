@@ -203,17 +203,27 @@ def showRooms():
     # show a list with the rooms from the logged user
     pass
 
-@app.route('/myRooms/questions/new', methods=['POST', 'GET'])
-def newQuestion(roomId=1):
+@app.route('/rooms/<room_id>')
+def showRoom(room_id):
+    # show the room with the given id
+    room = db.rooms.find_one({"_id": room_id})
+    print("room: ", room)
+    if room is None:
+        flash('Room not found', 'danger')
+        return redirect(url_for('home'))
+    questions = db.questions.find({"room_id": room_id})
+    return render_template("room.html", room=room, questions=questions)
+
+@app.route('/rooms/<string:room_id>/questions/new', methods=['POST', 'GET'])
+def newQuestion(room_id):
     # username = getLoggedUsername()
     # if username == '':
     #     flash('Please, login first', 'danger')
     #     return redirect(url_for('login'))
 
     if request.method == 'GET':
-        questions = list(db.questions.find({}))
-        return render_template('newQuestion.html', questions=questions)
-
+        questions = list(db.questions.find({"room_id": room_id}))
+        return render_template('newQuestion.html', questions=questions, room_id=room_id)
     else:
         answers = request.form.getlist('answer')
         question = request.form.get('questionText')
@@ -223,8 +233,8 @@ def newQuestion(roomId=1):
         answerList = []
         for i in range(len(answers)):
             answerList.append({'text': answers[i], 'bgColor': bgColors[i], 'textColor': txtColors[i], 'correct': getCorrectOrWrong(i, keys)})
-        db.questions.insert_one({'roomId': roomId, 'text': question, 'answers': answerList})
-        flash("Quiz question added")
+        db.questions.insert_one({'roomId': room_id, 'text': question, 'answers': answerList})
+        flash("Quiz question added", "success")
         questions = list(db.questions.find({}))
         return render_template('newQuestion.html', questions=questions)
 
@@ -247,12 +257,12 @@ def deleteQuestion(id=0):
 
 if __name__ == '__main__':
     db.users.drop()
-    db.questions.drop()
+    # db.questions.drop()
     db.rooms.drop()
 
     db.users.insert_one(
         {"username": "123", "password": generate_password_hash('123'), "profile_pic": ''})
-    db.rooms.insert_one({"_id": 1, "owner": '123', "joined": [{"username" : "gabriel"}]})
+    db.rooms.insert_one({"_id": '1', "owner": '123', "joined": [{"username" : "gabriel"}]})
     # db.questions.insert_one({"room": "id of the room","text": 'A question?', "answers": [{"text": 'text for the answer 1', "color": 'hex code for a answer', "correct": True}, {"text": 'text for the answer 2', "color": 'hex code for a answer', "correct": False}]})
     # db.results.insert_one({"user": "a username", "room": "id_room", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})
 

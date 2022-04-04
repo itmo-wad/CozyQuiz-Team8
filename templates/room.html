@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card mx-auto border-secondary col-8 mb-4 d-flex p-3">
+  <h2 class="text-center">{{room._id}}</h2>
+  {% for question in questions %}
+    {{ question.questionText }}
+    {% for answer in question.answers %}
+      {{ answer.answerText }}
+    {% endfor %}
+  {% endfor %}
+</div>
+{% endblock %}
