@@ -449,7 +449,7 @@ if __name__ == '__main__':
     # db.rooms.insert_one({"_id": '2', "owner": '123', "joined": [{"username" : "gabriel"}]})
     # db.questions.insert_one({"room": "id of the room","text": 'A question?', "answers": [{"text": 'text for the answer 1', "color": 'hex code for a answer', "correct": True}, {"text": 'text for the answer 2', "color": 'hex code for a answer', "correct": False}]})
     # db.results.insert_one({"user": "a username", "room": "id_room", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})
-
+    db.questions.drop()
     db.questions.insert_one(
         {"roomId": ObjectId("624c3eb5b522caa8d4555421"), "text": "What is the capital of Poland?",
          "answers": [{"number": 0, "text": "Warsaw", "bgColor": "#eeeeee", "textColor": "#212529", "correct": True},
