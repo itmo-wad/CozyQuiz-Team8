@@ -86,6 +86,30 @@ def checkAnswer(question, answerNumber):
 def home():
     return render_template('home.html')
 
+@app.route('/enterQuiz', methods=["GET", "POST"])
+def enterQuiz():
+    if request.method == "GET":
+        username = getLoggedUsername() # logged users will be forced to used their username as nickname
+        return render_template("enterQuiz.html", username = username)
+    else: #POST
+        username = request.form.get("username")
+        room_id = request.form.get("room_code") #room id is the same with room code
+        # check if room exists
+        room = db.rooms.find_one({"_id": room_id})
+        if room == None:
+            flash("Unable to join, Room does not exist!")
+            return redirect(request.url)
+        else:
+            # check if nickname exists in the same room
+            nickname = db.rooms.find_one({"joined": username})
+            if nickname != None:
+                flash("Nickname already Taken! :(")
+                return redirect(request.url)
+            else:
+                db.rooms.update_one({"_id": room_id}, {
+                                "$addToSet": {"joined": username}}) # adds user into joinedUsers array
+                # CHANGE REDIRECT URL TO ROOM
+        return redirect("/CHANGE_ME_INTO_ROOM_LINK!")
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -374,16 +398,13 @@ if __name__ == '__main__':
 
     db.users.insert_one(
         {"username": "123", "password": generate_password_hash('123'), "profile_pic": ''})
-<<<<<<< Updated upstream
     db.rooms.insert_one({"_id": '1', "owner": '123', "joined": [{"username" : "gabriel"}]})
     db.rooms.insert_one({"_id": '2', "owner": '123', "joined": [{"username" : "gabriel"}]})
-=======
     db.users.insert_one(
         {"username": "d", "password": generate_password_hash('d'), "profile_pic": ''})
-    db.rooms.insert_one({"_id": '624c1f2d651bcf422c52a6bb', "owner": '123', "joined": [{"username" : "gabriel"}]})
-    db.rooms.insert_one({"_id": '624c1f2d651bcf422c52a6cc', "owner": '123', "joined": [{"username" : "gabriel"}]})
-    db.rooms.insert_one({"_id": '624c1f2d651bcf422c52a6dd', "owner": '123', "joined": [{"username" : "gabriel"}]})
->>>>>>> Stashed changes
+    db.rooms.insert_one({"_id": '624c1f2d651bcf422c52a6bb', "owner": '123', "joined": ["gabie","nico"]})
+    db.rooms.insert_one({"_id": '624c1f2d651bcf422c52a6cc', "owner": '123', "joined": ["gabie","nico"]})
+    db.rooms.insert_one({"_id": '624c1f2d651bcf422c52a6dd', "owner": '123', "joined": ["gabie","nico"]})
     # db.questions.insert_one({"room": "id of the room","text": 'A question?', "answers": [{"text": 'text for the answer 1', "color": 'hex code for a answer', "correct": True}, {"text": 'text for the answer 2', "color": 'hex code for a answer', "correct": False}]})
     # db.results.insert_one({"user": "a username", "room": "id_room", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})
 
