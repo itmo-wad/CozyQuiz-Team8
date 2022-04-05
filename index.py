@@ -450,4 +450,25 @@ if __name__ == '__main__':
     # db.questions.insert_one({"room": "id of the room","text": 'A question?', "answers": [{"text": 'text for the answer 1', "color": 'hex code for a answer', "correct": True}, {"text": 'text for the answer 2', "color": 'hex code for a answer', "correct": False}]})
     # db.results.insert_one({"user": "a username", "room": "id_room", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})
 
+    db.questions.insert_one(
+        {"roomId": ObjectId("624c3eb5b522caa8d4555421"), "text": "What is the capital of Poland?",
+         "answers": [{"number": 0, "text": "Warsaw", "bgColor": "#eeeeee", "textColor": "#212529", "correct": True},
+                     {"number": 1, "text": "Helsinki", "bgColor": "#eeeeee", "textColor": "#212529", "correct": False}]})
+    db.questions.insert_one(
+        {"roomId": ObjectId("624c3eb5b522caa8d4555421"), "text": "Europe is separated from Africa by which sea?",
+         "answers": [{"number": 0, "text": "Mediterranean Sea", "bgColor": "#eeeeee", "textColor": "#212529", "correct": True},
+                     {"number": 1, "text": "Bering Sea", "bgColor": "#eeeeee", "textColor": "#212529", "correct": False}]})
+    db.questions.insert_one(
+        {"roomId": ObjectId("624c3eb5b522caa8d4555421"), "text": "Which of Shakespeare’s plays is the longest?",
+         "answers": [{"number": 0, "text": "Macbeth", "bgColor": "#eeeeee", "textColor": "#212529", "correct": False},
+                     {"number": 1, "text": "Hamlet", "bgColor": "#eeeeee", "textColor": "#212529", "correct": True}]})
+    db.questions.insert_one(
+        {"roomId": ObjectId("624c3eb5b522caa8d4555421"), "text": "Which nuts give marzipan its distinctive taste?",
+         "answers": [{"number": 0, "text": "Walnut", "bgColor": "#eeeeee", "textColor": "#212529", "correct": False},
+                     {"number": 1, "text": "Almonds", "bgColor": "#eeeeee", "textColor": "#212529", "correct": True}]})
+    db.questions.insert_one(
+        {"roomId": ObjectId("624c3eb5b522caa8d4555421"), "text": "How many bones are in the adult human body?",
+         "answers": [{"number": 0, "text": "around 205", "bgColor": "#eeeeee", "textColor": "#212529", "correct": True},
+                     {"number": 1, "text": "around 180", "bgColor": "#eeeeee", "textColor": "#212529", "correct": False}]})
+    
     app.run(host='localhost', port=5000, debug=True)
