@@ -2,7 +2,7 @@
 {% block content %}
 <div class="card mx-auto col-8 mb-4 d-flex p-3">
   <div class="d-flex">
-    <h2 class="mb-4 col-8">Room #12312</h2>
+    <h2 class="mb-4 col-8">Room #{{ room._id }}</h2>
     {% if score[0] > score[1]/2 %}
       <h1 class="text-center mx-auto mb-4 text-success col-3">Score {{score[0]}}/{{score[1]}}</h1>
     {% else %}

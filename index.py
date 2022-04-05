@@ -83,6 +83,8 @@ def checkAnswer(question, answerNumber):
     return False
 
 def countAnswers(questionId, answerNumber):
+    print("counting")
+    print(db.results.find_one({'answers': {"questionId" : ObjectId(questionId)}}))
     if db.results.find_one({'answers.questionId': ObjectId(questionId), "answers.answerNumber": answerNumber}) is None:
         return 0
     results = db.results.find({'answers.questionId': ObjectId(questionId), "answers.answerNumber": answerNumber})
@@ -104,15 +106,18 @@ def enterQuiz():
         username = request.form.get("username")
         room_id = request.form.get("room_code") #room id is the same with room code
         # check if room exists
-        room = db.rooms.find_one({"_id": ObjectId(room_id)})
+        if ObjectId.is_valid(room_id):
+            room = db.rooms.find_one({"_id": ObjectId(room_id)})
+        else:
+             room = None
         if room == None:
-            flash("Unable to join, Room does not exist!")
+            flash("Unable to join, Room does not exist!", 'danger')
             return redirect(request.url)
         else:
             # check if nickname exists in the same room
             joined = room['joined']
             if username in joined:
-                flash("Nickname already Taken! :(")
+                flash("Nickname already Taken! :(", 'danger')
                 return redirect(request.url)
             else:
                 # add nickname to session
@@ -182,7 +187,7 @@ def createQuizVerification():
 def createQuiz():
     username = getLoggedUsername()
     if username != '':
-        room_info = db.rooms.insert_one({"owner": username})
+        room_info = db.rooms.insert_one({"owner": username, "joined": []})
         room_id = room_info.inserted_id
         session['room_id'] = str(room_id)
         return redirect(url_for('showRoom', room_id=room_id))
@@ -350,8 +355,7 @@ def answerQuiz(room_id):
         question = getNextQuestion(room_id)
         if question is None:
             flash('You finished your quiz', 'success')
-            session.pop('nickname', None)
-            return redirect(url_for('results', room_id=room_id))
+            return redirect(url_for('showResults', room_id=room_id))
         return render_template('answerQuiz.html', question=question, room=room)
     else:
         questionId = request.form.get('questionId')
@@ -374,6 +378,7 @@ def answerQuiz(room_id):
 def showResults(room_id):
     room = db.rooms.find_one({"_id": ObjectId(room_id)})
     if room is None:
+        session.pop('nickname', None)
         flash('Room not found', 'danger')
         return redirect(url_for('home'))
 
@@ -381,6 +386,11 @@ def showResults(room_id):
     if results is None:
         flash('You have not answered any questions yet', 'danger')
         return redirect(url_for('home'))
+    
+    questionCount = len(list(db.questions.find({"roomId": ObjectId(room_id)})))
+    if len(results['answers']) != questionCount:
+        flash('You have not answered all the questions yet', 'danger')
+        return redirect(url_for('answerQuiz', room_id=room_id))
 
     rightAnswers = 0
     resultsTemplate = []
@@ -435,7 +445,7 @@ def showRoomResults(room_id):
              'textColor': questionAnswer['textColor'], 'check': questionAnswer['correct'], "chooseBy": countAnswers(question['_id'], questionAnswer['number'])})
         questionsTemplate.append({'question': question['text'], 'answers': answers})
 
-    return render_template('showRoomResults.html', results=questionsTemplate)
+    return render_template('roomResults.html', results=questionsTemplate, room=room)
 
 if __name__ == '__main__':
     db.users.drop()

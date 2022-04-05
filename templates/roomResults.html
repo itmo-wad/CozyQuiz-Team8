@@ -9,7 +9,7 @@
       <div class="row">
         {% for answer in result.answers %}
         <button class="btn col-5 mx-auto my-2 text-center" style="background-color: {{answer.bgColor}}; color: {{ answer.textColor }}">
-          {{ answer.text }}
+          {{ answer.text }} / {{ answer.chooseBy }}
         </button>
         {% endfor %}
       </div>

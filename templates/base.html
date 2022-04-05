@@ -52,6 +52,9 @@
             </li>
             {% if 'logged' in session %}
               <li class="nav-item mx-2">
+                <a class="nav-link" href="{{ url_for('enterQuiz') }}">Enter Quiz</a>
+              </li>
+              <li class="nav-item mx-2">
                 <a class="nav-link" href="{{ url_for('showUserQuizzes') }}">My Quizzes</a>
               </li>
               <li class="nav-item mx-2">
