@@ -2,17 +2,12 @@
 {% block content %}
 <div class="card mx-auto border-secondary col-8 mb-4 d-flex p-3">
   <h2 class="text-center mb-4">Room Number: {{room._id}}</h2>
-  <div class="d-flex flex-row-reverse mx-4">
-    <a class="btn btn-secondary mt-2 mb-4 text-center" type="button" href="{{url_for('newQuestion', room_id=room._id)}}">
-      Add Question
-    </a>
-  </div>
-  {% for question in questions %}
+  {% for result in results %}
   <div class="card mx-auto col-8 mb-4 d-flex p-3 rounded border">
-    <h4 class="text-center">{{ question.text }}</h4>
+    <h4 class="text-center">{{ result.question }}</h4>
     <div class="card-body">
       <div class="row">
-        {% for answer in question.answers %}
+        {% for answer in result.answers %}
         <button class="btn col-5 mx-auto my-2 text-center" style="background-color: {{answer.bgColor}}; color: {{ answer.textColor }}">
           {{ answer.text }}
         </button>
