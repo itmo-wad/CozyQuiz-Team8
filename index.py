@@ -93,7 +93,7 @@ def home():
     session.pop('nickname', None)
     if 'logged' in session:
         return redirect(url_for('myProfile'))
-    return redirect(url_for('enterQuiz'))
+    return render_template('home.html')
 
 @app.route('/enterQuiz', methods=["GET", "POST"])
 def enterQuiz():
@@ -324,14 +324,6 @@ def deleteQuestion(id=0):
             db.questions.delete_one({"_id": ObjectId(id)})
             return redirect('/questions/new')
         return redirect('/questions/new')
-
-@app.route('/question/show/<id>')
-def showQuestion(id):
-    question = db.questions.find_one({"_id": ObjectId(id)})
-    if question is None:
-        flash('Question not found', 'danger')
-        return redirect(url_for('home'))
-    return render_template('showQuestion.html', question=question)
 
 @app.route('/answerQuiz/<string:room_id>/', methods=['GET', 'POST'])
 def answerQuiz(room_id):

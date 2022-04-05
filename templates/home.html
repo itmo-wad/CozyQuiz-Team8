@@ -2,9 +2,11 @@
 {% block content %}
 <div class="card mx-auto border-secondary col-8 mb-4 d-flex p-3">
   <div class="card-body mx-auto">
-    <img src="/static/cozyLogo.png" alt="Logo" style="display: block;margin-left: auto;margin-right: auto;width: 50%;"> 
-    <hr>
-    <p style="text-align:center" >You can join a room by clicking:  <a href="/enterQuiz"><button>Enter Quiz!</button></a> </p>
+    <img class="mb-4" src="/static/cozyLogo.png" alt="Logo" style="display: block;margin-left: auto;margin-right: auto;width: 50%;"> 
+    <h5 class="text-center mb-3">You can join a room by clicking:</h5>
+    <div class="d-flex">
+      <a class="btn btn-outline-secondary mx-auto" type="button" href="{{ url_for('enterQuiz') }}">Join Room</a>
+    </div>
   </div>
 </div>
 {% endblock %}
