@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card mx-auto border-secondary col-8 mb-4 d-flex p-3">
+    <h1>User Quizes:</h1>
+    <hr>
+    {% for quiz in quizes %}
+    <p>Quiz: <b>{{ quiz['_id'] }} </b>
+    <a href="/rooms/{{quiz['_id']}}/questions/new"><button>Questions</button></a>
+    {% endfor %}
+    <hr>
+    <button type="button" onclick="document.location='/createQuizVerification'">New Quiz!</button> 
+</div>
+{% endblock %}

@@ -92,6 +92,30 @@ def countAnswers(questionId, answerNumber):
 def home():
     return render_template('home.html')
 
+@app.route('/enterQuiz', methods=["GET", "POST"])
+def enterQuiz():
+    if request.method == "GET":
+        username = getLoggedUsername() # logged users will be forced to used their username as nickname
+        return render_template("enterQuiz.html", username = username)
+    else: #POST
+        username = request.form.get("username")
+        room_id = request.form.get("room_code") #room id is the same with room code
+        # check if room exists
+        room = db.rooms.find_one({"_id": room_id})
+        if room == None:
+            flash("Unable to join, Room does not exist!")
+            return redirect(request.url)
+        else:
+            # check if nickname exists in the same room
+            nickname = db.rooms.find_one({"joined": username})
+            if nickname != None:
+                flash("Nickname already Taken! :(")
+                return redirect(request.url)
+            else:
+                db.rooms.update_one({"_id": room_id}, {
+                                "$addToSet": {"joined": username}}) # adds user into joinedUsers array
+                # CHANGE REDIRECT URL TO ROOM
+        return redirect("/CHANGE_ME_INTO_ROOM_LINK!")
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
@@ -129,6 +153,16 @@ def signup():
                              "profile_pic": ''})
         flash('Account Created!', 'success')
         return redirect('/')
+
+@app.route('/userQuizes')
+def showUserQuizes():
+    username = getLoggedUsername()
+    if username != '':
+        quizes = list(db.rooms.find({"owner" : username}))
+        for quiz in quizes:
+            print(quiz['_id'])
+        return render_template('userQuizes.html', quizes = quizes) 
+    return redirect(url_for('login'))       
 
 @app.route('/createQuizVerification')
 def createQuizVerification():

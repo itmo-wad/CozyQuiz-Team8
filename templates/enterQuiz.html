@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card mx-auto border-secondary col-8 mb-4 d-flex p-3">
+    <h2>Enter Quiz:</h2>
+    <hr>
+    <form action="/enterQuiz" method="post">
+        {% if username == "" %}
+        <label for="username"><b>Nickname</b></label>
+        <input type="text" placeholder="BuffDoge18" name="username" required>
+        {% else %}
+        <label for="username"><b>Nickname</b></label>
+        <input readonly disabled type="text" value="{{ username }}" name="username" required>
+        {% endif %}
+        <label for="room_code"><b>Room Code</b></label>
+        <input type="text" placeholder="624c1f2d652bcf477c52a62c" name="room_code" required>
+        <label>
+        <input type="checkbox" required name="norobot" style="margin-bottom:15px"> I am not a robot!
+        </label>
+        <div class="clearfix">
+        <button type="submit">Join</button>
+        </div>
+    </form>
+  </div>
+{% endblock %}
