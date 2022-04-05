@@ -124,6 +124,16 @@ def signup():
         flash('Account Created!', 'success')
         return redirect('/')
 
+@app.route('/userQuizes')
+def showUserQuizes():
+    username = getLoggedUsername()
+    if username != '':
+        quizes = list(db.rooms.find({"owner" : username}))
+        for quiz in quizes:
+            print(quiz['_id'])
+        return render_template('userQuizes.html', quizes = quizes) 
+    return redirect(url_for('login'))       
+
 @app.route('/createQuizVerification')
 def createQuizVerification():
     username = getLoggedUsername()
@@ -359,13 +369,21 @@ def showResults(room_id):
 
 if __name__ == '__main__':
     db.users.drop()
-    # db.questions.drop()
     db.rooms.drop()
+    # db.questions.drop()
 
     db.users.insert_one(
         {"username": "123", "password": generate_password_hash('123'), "profile_pic": ''})
+<<<<<<< Updated upstream
     db.rooms.insert_one({"_id": '1', "owner": '123', "joined": [{"username" : "gabriel"}]})
     db.rooms.insert_one({"_id": '2', "owner": '123', "joined": [{"username" : "gabriel"}]})
+=======
+    db.users.insert_one(
+        {"username": "d", "password": generate_password_hash('d'), "profile_pic": ''})
+    db.rooms.insert_one({"_id": '624c1f2d651bcf422c52a6bb', "owner": '123', "joined": [{"username" : "gabriel"}]})
+    db.rooms.insert_one({"_id": '624c1f2d651bcf422c52a6cc', "owner": '123', "joined": [{"username" : "gabriel"}]})
+    db.rooms.insert_one({"_id": '624c1f2d651bcf422c52a6dd', "owner": '123', "joined": [{"username" : "gabriel"}]})
+>>>>>>> Stashed changes
     # db.questions.insert_one({"room": "id of the room","text": 'A question?', "answers": [{"text": 'text for the answer 1', "color": 'hex code for a answer', "correct": True}, {"text": 'text for the answer 2', "color": 'hex code for a answer', "correct": False}]})
     # db.results.insert_one({"user": "a username", "room": "id_room", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})
 
