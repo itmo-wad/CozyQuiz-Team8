@@ -51,6 +51,12 @@ def getProfilePic():
     return 'static/icon.png'
 
 
+def getCorrectOrWrong(i, keys):
+    if f"correct{i}" in keys:
+        return True
+    return False
+
+
 def allowedFile(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -192,37 +198,48 @@ def uploadProfilePic():
 def uploadedFile(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+@app.route('/myRooms')
+def showRooms():
+    # show a list with the rooms from the logged user
+    pass
 
-@app.route('/questions/new', methods=['POST', 'GET'])
-def newQuestion():
-    username = getLoggedUsername()
-    if username == '':
-        flash('Please, login first', 'danger')
-        return redirect(url_for('login'))
+@app.route('/rooms/<room_id>')
+def showRoom(room_id):
+    # show the room with the given id
+    room = db.rooms.find_one({"_id": room_id})
+    print("room: ", room)
+    if room is None:
+        flash('Room not found', 'danger')
+        return redirect(url_for('home'))
+    questions = db.questions.find({"roomId": room_id})
+    print("questions: ", questions)
+    return render_template("room.html", room=room, questions=questions)
+
+@app.route('/rooms/<string:room_id>/questions/new', methods=['POST', 'GET'])
+def newQuestion(room_id):
+    # username = getLoggedUsername()
+    # if username == '':
+    #     flash('Please, login first', 'danger')
+    #     return redirect(url_for('login'))
 
     if request.method == 'GET':
-        questions = list(db.questions.find({}))
-        return render_template('newQuestion.html', questions=questions)
-
+        questions = list(db.questions.find({"room_id": room_id}))
+        return render_template('newQuestion.html', questions=questions, room_id=room_id)
     else:
-        quiz_question = request.form.get("question")
-        quiz_answer1 = request.form.get("answer1")
-        quiz_answer2 = request.form.get("answer2")
-        db.questions.insert_one({
-            "room": "",
-            "text": quiz_question,
-            "text1": quiz_answer1,
-            "color1": '#03c04A',
-            "correct1": True,
-            "text2": quiz_answer2,
-            "color2": '#D21404',
-            "correct2": False
-        })
-        flash("Quiz question added")
+        answers = request.form.getlist('answer')
+        question = request.form.get('questionText')
+        bgColors = request.form.getlist('answerBgColor')
+        txtColors = request.form.getlist('answerTextColor')
+        keys = request.form.keys()
+        answerList = []
+        for i in range(len(answers)):
+            answerList.append({'text': answers[i], 'bgColor': bgColors[i], 'textColor': txtColors[i], 'correct': getCorrectOrWrong(i, keys)})
+        db.questions.insert_one({'roomId': room_id, 'text': question, 'answers': answerList})
+        flash("Quiz question added", "success")
         questions = list(db.questions.find({}))
         return render_template('newQuestion.html', questions=questions)
 
-
+# IDK if its working
 @app.route('/questions/delete/<id>', methods=["POST"])
 def deleteQuestion(id=0):
     username = getLoggedUsername()
@@ -238,13 +255,16 @@ def deleteQuestion(id=0):
         return redirect('/questions/new')
 
 
+
 if __name__ == '__main__':
     db.users.drop()
+    # db.questions.drop()
+    db.rooms.drop()
 
     db.users.insert_one(
         {"username": "123", "password": generate_password_hash('123'), "profile_pic": ''})
-    # db.rooms.insert_one({"owner": 'username of the owner'})
+    db.rooms.insert_one({"_id": '1', "owner": '123', "joined": [{"username" : "gabriel"}]})
     # db.questions.insert_one({"room": "id of the room","text": 'A question?', "answers": [{"text": 'text for the answer 1', "color": 'hex code for a answer', "correct": True}, {"text": 'text for the answer 2', "color": 'hex code for a answer', "correct": False}]})
-    # db.results.insert_one({"user": "a username", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})
+    # db.results.insert_one({"user": "a username", "room": "id_room", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})
 
     app.run(host='localhost', port=5000, debug=True)

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card mx-auto col-8 mb-4 d-flex p-3">
+  <h2 class="text-center">{{ question.text }}</h2>
+  <div class="card-body">
+    <div class="row">
+      {% for answer in question.answers %}
+        <div class="col-5" style="background-color: {{answer.bgColor}}; color: {{ answer.textColor }}">
+        {{ answer.text }}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}
