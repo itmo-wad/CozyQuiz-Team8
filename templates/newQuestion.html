@@ -5,7 +5,7 @@
     <h2 class="text-center">Add Question</h2>
     <form class="mb-0 card-body mx-auto flex-column justify-content-center align-items-center" action="{{ url_for('newQuestion', room_id=room_id) }}" method="POST">
       <div class="form-floating mb-3">
-        <input value="Pergunta padrão??" type="text" class="form-control" id="questionText" name="questionText" placeholder="Question">
+        <input type="text" class="form-control" id="questionText" name="questionText" placeholder="Question">
         <label for="floatingInput">Question</label>
       </div>
       <div class="row" id="answerRow">

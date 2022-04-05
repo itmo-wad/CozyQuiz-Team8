@@ -161,14 +161,14 @@ def signup():
         flash('Account Created!', 'success')
         return redirect('/')
 
-@app.route('/userQuizes')
-def showUserQuizes():
+@app.route('/userQuizzes')
+def showUserQuizzes():
     username = getLoggedUsername()
     if username != '':
-        quizes = list(db.rooms.find({"owner" : username}))
-        for quiz in quizes:
+        quizzes = list(db.rooms.find({"owner" : username}))
+        for quiz in quizzes:
             print(quiz['_id'])
-        return render_template('userQuizes.html', quizes = quizes) 
+        return render_template('userQuizzes.html', quizzes = quizzes) 
     return redirect(url_for('login'))       
 
 @app.route('/createQuizVerification')
@@ -310,20 +310,27 @@ def newQuestion(room_id):
         flash("Quiz question added", "success")
         return redirect(url_for('showRoom', room_id=room_id))
 
-# IDK if its working
-@app.route('/questions/delete/<id>', methods=["POST"])
-def deleteQuestion(id=0):
-    username = getLoggedUsername()
-    if username == '':
-        flash('Please, login first', 'danger')
-        return redirect(url_for('login'))
-
+@app.route('/rooms/<string:room_id>/questions/delete/<question_id>', methods=["POST"])
+def deleteQuestion(room_id, question_id):
     if request.method == "POST":
-        print(id)
-        if id != 0:
-            db.questions.delete_one({"_id": ObjectId(id)})
-            return redirect('/questions/new')
-        return redirect('/questions/new')
+        username = getLoggedUsername()
+        if username == '':
+            flash('Please, login first', 'danger')
+            return redirect(url_for('login'))
+
+        room = db.rooms.find_one({"_id": ObjectId(room_id)})
+        if room is None:
+            flash('Room not found', 'danger')
+            return redirect(url_for('home'))
+        if room['owner'] != username:
+            flash('You are not the owner of that room', 'danger')
+            return redirect(url_for('home'))
+
+        if db.questions.delete_one({"_id": ObjectId(question_id)}):
+            flash("Question deleted", "success")
+            return redirect(url_for('showRoom', room_id=room_id))
+        flash('Question not found', 'danger')
+        return redirect(url_for('showRoom', room_id=room_id))
 
 @app.route('/answerQuiz/<string:room_id>/', methods=['GET', 'POST'])
 def answerQuiz(room_id):

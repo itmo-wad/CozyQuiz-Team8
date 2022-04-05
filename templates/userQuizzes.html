@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="card mx-auto border-secondary col-8 mb-4 d-flex p-3">
-    <h2 class="text-center mb-4">My Quizes</h2>
+    <h2 class="text-center mb-4">My Quizzes</h2>
     <div class="row mb-3">
-        {% for quiz in quizes %}
+        {% for quiz in quizzes %}
         <div class="col-11 col-md-8 mx-auto border py-3 rounded mb-2">
             <h4 class="text-center">Quiz: <strong>#{{ quiz['_id'] }}</strong></h4>
             <div class="d-flex justify-content-center">
