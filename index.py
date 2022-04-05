@@ -444,7 +444,7 @@ if __name__ == '__main__':
     # db.results.drop()
 
     db.users.insert_one(
-        {"username": "123", "password": generate_password_hash('123'), "profile_pic": ''})
+        {"username": "123", "password": generate_password_hash('123'), "profile_pic": '624afbe60c0ab501b81b0517.png'})
     # db.rooms.insert_one({"_id": '1', "owner": '123', "joined": [{"username" : "gabriel"}]})
     # db.rooms.insert_one({"_id": '2', "owner": '123', "joined": [{"username" : "gabriel"}]})
     # db.questions.insert_one({"room": "id of the room","text": 'A question?', "answers": [{"text": 'text for the answer 1', "color": 'hex code for a answer', "correct": True}, {"text": 'text for the answer 2', "color": 'hex code for a answer', "correct": False}]})
