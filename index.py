@@ -103,6 +103,7 @@ def createQuizVerification():
     if username != '':
         return render_template("createQuizVerification.html")
     return redirect(url_for('login'))
+
 @app.route('/createQuiz')
 def createQuiz():
     username = getLoggedUsername()
