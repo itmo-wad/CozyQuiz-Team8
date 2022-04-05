@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card mx-auto col-8 mb-4 d-flex p-3">
+  <div class="d-flex">
+    <h2 class="mb-4 col-8">Room #12312</h2>
+    {% if score[0] > score[1]/2 %}
+      <h1 class="text-center mx-auto mb-4 text-success col-3">Score {{score[0]}}/{{score[1]}}</h1>
+    {% else %}
+      <h1 class="text-center mx-auto mb-4 text-danger col-3">Score {{score[0]}}/{{score[1]}}</h1>
+    {% endif %}
+  </div>
+  {% for result in results %}
+    <div class="card mx-auto col-10 mb-4 d-flex p-3 rounded border">
+      <h3 class="text-center">{{ result.question }}</h3>
+      <div class="card-body">
+        <div class="row">
+          {% for answer in result.answers %}
+            <div class="col-11 col-md-5 positionRelative mx-auto my-3 text-center d-flex card p-0 border-0 rounded-3" style="background-color: {{answer.bgColor}}; color: {{ answer.textColor }}">
+              <button class="col-12 h4 btn my-auto w-100 h-100" type="submit" style="background-color: {{answer.bgColor}}; color: {{ answer.textColor }}">
+                {{ answer.text }}
+              </button>
+              {% if answer.check == None %}
+              {% elif answer.check %}
+                <div class="floatingBtnTop btn m-1 btn-secondary bg-success">
+                  <i class="fa-solid fa-check bigIcon"></i>
+                </div>
+              {% else %}
+                <div class="floatingBtnTop btn m-1 btn-secondary bg-danger">
+                  <i class="fa-solid fa-xmark bigIcon"></i>
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

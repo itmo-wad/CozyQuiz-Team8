@@ -60,6 +60,27 @@ def getCorrectOrWrong(i, keys):
 def allowedFile(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def getNextQuestion(room_id):
+    questions = list(db.questions.find({"roomId": room_id}))
+    results = db.results.find_one({"roomId": room_id, "user": session['nickname']})
+    if results:
+        print('results[answers]: ', results['answers'])
+        question_id = results['answers'][-1]['questionId']
+        for i in range(len(questions)):
+            if questions[i]['_id'] == ObjectId(question_id):
+                if i + 1 < len(questions):
+                    return questions[i + 1]
+        return None
+    return questions[0]
+
+def checkAnswer(question, answerNumber):
+    print('answerNumber', answerNumber)
+    print('question: ', question)
+    print('answer[0]: ', question['answers'][0])
+    print('answer[0][correct]: ', question['answers'][0]['correct'])
+    if question['answers'][answerNumber]['correct'] == True:
+        return True
+    return False
 
 @app.route('/')
 def home():
@@ -203,24 +224,33 @@ def showRooms():
     # show a list with the rooms from the logged user
     pass
 
+# show the room with the given id
 @app.route('/rooms/<room_id>')
 def showRoom(room_id):
-    # show the room with the given id
     room = db.rooms.find_one({"_id": room_id})
-    print("room: ", room)
     if room is None:
         flash('Room not found', 'danger')
         return redirect(url_for('home'))
+
     questions = db.questions.find({"roomId": room_id})
     print("questions: ", questions)
     return render_template("room.html", room=room, questions=questions)
 
 @app.route('/rooms/<string:room_id>/questions/new', methods=['POST', 'GET'])
 def newQuestion(room_id):
-    # username = getLoggedUsername()
+    username = getLoggedUsername()
     # if username == '':
     #     flash('Please, login first', 'danger')
     #     return redirect(url_for('login'))
+
+    room = db.rooms.find_one({"_id": room_id})
+    if room is None:
+        flash('Room not found', 'danger')
+        return redirect(url_for('home'))
+
+    if room['owner'] != username:
+        flash('You are not the owner of that room', 'danger')
+        return redirect(url_for('home'))
 
     if request.method == 'GET':
         questions = list(db.questions.find({"room_id": room_id}))
@@ -233,7 +263,7 @@ def newQuestion(room_id):
         keys = request.form.keys()
         answerList = []
         for i in range(len(answers)):
-            answerList.append({'text': answers[i], 'bgColor': bgColors[i], 'textColor': txtColors[i], 'correct': getCorrectOrWrong(i, keys)})
+            answerList.append({'number': i, 'text': answers[i], 'bgColor': bgColors[i], 'textColor': txtColors[i], 'correct': getCorrectOrWrong(i, keys)})
         db.questions.insert_one({'roomId': room_id, 'text': question, 'answers': answerList})
         flash("Quiz question added", "success")
         questions = list(db.questions.find({}))
@@ -254,7 +284,78 @@ def deleteQuestion(id=0):
             return redirect('/questions/new')
         return redirect('/questions/new')
 
+@app.route('/question/show/<id>')
+def showQuestion(id):
+    question = db.questions.find_one({"_id": ObjectId(id)})
+    if question is None:
+        flash('Question not found', 'danger')
+        return redirect(url_for('home'))
+    return render_template('showQuestion.html', question=question)
 
+@app.route('/answerQuiz/<string:room_id>/', methods=['GET', 'POST'])
+def answerQuiz(room_id):
+    room = db.rooms.find_one({"_id": room_id})
+    if room is None:
+        flash('Room not found', 'danger')
+        return redirect(url_for('home'))
+
+    if request.method == 'GET':
+        session['nickname'] = 'guest'
+        if db.questions.find_one({"roomId": room_id}) is None:
+            flash('No questions in this room', 'danger')
+            return redirect(url_for('home'))
+        question = getNextQuestion(room_id)
+        if question is None:
+            flash('You finished your quiz', 'success')
+            return redirect(url_for('home'))
+        return render_template('answerQuiz.html', question=question, room=room)
+    else:
+        questionId = request.form.get('questionId')
+        question = db.questions.find_one({"_id": ObjectId(questionId)})
+        answerNumber = request.form.get('answerNumber', type=int)
+        result = db.results.find_one({"roomId": room_id, "user": session['nickname']})
+        if result is None:
+            db.results.insert_one({'roomId': room_id, 'user': session['nickname'],
+             'answers': [{'questionId': questionId, 'answerNumber': answerNumber,
+             'correct': checkAnswer(question, answerNumber)}]})
+        else:
+            newAnswersArray = result['answers'] + [{'questionId': questionId,
+                                'answerNumber': answerNumber,
+                                'correct': checkAnswer(question, answerNumber)}]
+            db.results.update_one({"roomId": room_id, "user": session['nickname']},
+                                {"$set": {"answers": newAnswersArray}})
+        return redirect(url_for('answerQuiz', room_id=room_id))
+
+@app.route('/results/<string:room_id>')
+def showResults(room_id):
+    room = db.rooms.find_one({"_id": room_id})
+    if room is None:
+        flash('Room not found', 'danger')
+        return redirect(url_for('home'))
+
+    results = db.results.find_one({"roomId": room_id, "user": session['nickname']})
+    if results is None:
+        flash('You have not answered any questions yet', 'danger')
+        return redirect(url_for('home'))
+
+    rightAnswers = 0
+    resultsTemplate = []
+    for answer in results['answers']:
+        question = db.questions.find_one({"_id": ObjectId(answer['questionId'])})
+        answers = []
+        for questionAnswer in question['answers']:
+            if questionAnswer['correct']:
+                if questionAnswer['number'] == answer['answerNumber']:
+                    rightAnswers += 1
+                answers.append({'text': questionAnswer['text'], 'bgColor': questionAnswer['bgColor'], 'textColor': questionAnswer['textColor'], 'check': True})
+            elif questionAnswer['number'] == answer['answerNumber']:
+                answers.append({'text': questionAnswer['text'], 'bgColor': questionAnswer['bgColor'], 'textColor': questionAnswer['textColor'], 'check': False})
+            else:
+                answers.append({'text': questionAnswer['text'], 'bgColor': questionAnswer['bgColor'], 'textColor': questionAnswer['textColor'], 'check': None})
+        resultsTemplate.append({'question': question['text'], 'answers': answers})
+
+    score = [rightAnswers, len(list(db.questions.find({"roomId": room_id})))]
+    return render_template('showResults.html', results=resultsTemplate, score=score)
 
 if __name__ == '__main__':
     db.users.drop()
@@ -264,6 +365,7 @@ if __name__ == '__main__':
     db.users.insert_one(
         {"username": "123", "password": generate_password_hash('123'), "profile_pic": ''})
     db.rooms.insert_one({"_id": '1', "owner": '123', "joined": [{"username" : "gabriel"}]})
+    db.rooms.insert_one({"_id": '2', "owner": '123', "joined": [{"username" : "gabriel"}]})
     # db.questions.insert_one({"room": "id of the room","text": 'A question?', "answers": [{"text": 'text for the answer 1', "color": 'hex code for a answer', "correct": True}, {"text": 'text for the answer 2', "color": 'hex code for a answer', "correct": False}]})
     # db.results.insert_one({"user": "a username", "room": "id_room", "answers": [{"question_num": "the question number", "answer": 3, "correct": False, "time": 10}]})
 

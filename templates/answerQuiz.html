@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card mx-auto border-secondary col-8 mb-4 d-flex p-3">
+  <h2 class="text-center mb-4">Room Number: {{room._id}}</h2>
+  <div class="card mx-auto col-8 mb-4 d-flex p-3 rounded border">
+    <h3 class="text-center">{{ question.text }}</h4>
+    <div class="card-body">
+      <div class="row">
+        {% for answer in question.answers %}
+        <form class="col-5 mx-auto my-2 text-center d-flex card p-0 border-0 rounded-3" action="{{ url_for('answerQuiz', room_id=room._id) }}" method="post">
+          <input type="hidden" name="questionId" value="{{ question._id }}">
+          <input type="hidden" name="answerNumber" value="{{ answer.number }}">
+          <button class="col-12 h4 btn my-auto w-100 h-100" type="submit" style="background-color: {{answer.bgColor}}; color: {{ answer.textColor }}">
+            {{ answer.text }}
+          </button>
+        </form>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
