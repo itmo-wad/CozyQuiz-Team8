@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block content %}
+
   <div class="card mx-auto col-8 mb-4 d-flex p-3">
     <h2 class="text-center">Add Question</h2>
     <form class="mb-0 card-body mx-auto flex-column justify-content-center align-items-center" action="{{ url_for('newQuestion', room_id=room_id) }}" method="POST">

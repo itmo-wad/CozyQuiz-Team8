@@ -90,7 +90,10 @@ def countAnswers(questionId, answerNumber):
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    session.pop('nickname', None)
+    if 'logged' in session:
+        return redirect(url_for('myProfile'))
+    return redirect(url_for('enterQuiz'))
 
 @app.route('/enterQuiz', methods=["GET", "POST"])
 def enterQuiz():
@@ -101,24 +104,27 @@ def enterQuiz():
         username = request.form.get("username")
         room_id = request.form.get("room_code") #room id is the same with room code
         # check if room exists
-        room = db.rooms.find_one({"_id": room_id})
+        room = db.rooms.find_one({"_id": ObjectId(room_id)})
         if room == None:
             flash("Unable to join, Room does not exist!")
             return redirect(request.url)
         else:
             # check if nickname exists in the same room
-            nickname = db.rooms.find_one({"joined": username})
-            if nickname != None:
+            joined = room['joined']
+            if username in joined:
                 flash("Nickname already Taken! :(")
                 return redirect(request.url)
             else:
-                db.rooms.update_one({"_id": room_id}, {
-                                "$addToSet": {"joined": username}}) # adds user into joinedUsers array
-                # CHANGE REDIRECT URL TO ROOM
-        return redirect("/CHANGE_ME_INTO_ROOM_LINK!")
+                # add nickname to session
+                session['nickname'] = username
+                # add nickname to the room
+                db.rooms.update_one({"_id": ObjectId(room_id)}, {
+                                "$set": {"joined": joined + [username]}}) # adds user into joinedUsers array
+        return redirect(url_for('answerQuiz', room_id=room_id))
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
+    session.pop('nickname', None)
     if request.method == "GET":
         username = getLoggedUsername()
         if username == '':
@@ -135,6 +141,7 @@ def login():
 
 @app.route('/signup', methods=["GET", "POST"])
 def signup():
+    session.pop('nickname', None)
     if request.method == "GET":
         return render_template("signup.html")
     else:
@@ -259,11 +266,6 @@ def uploadProfilePic():
 def uploadedFile(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-@app.route('/myRooms')
-def showRooms():
-    # show a list with the rooms from the logged user
-    pass
-
 # show the room with the given id
 @app.route('/rooms/<room_id>')
 def showRoom(room_id):
@@ -333,20 +335,24 @@ def showQuestion(id):
 
 @app.route('/answerQuiz/<string:room_id>/', methods=['GET', 'POST'])
 def answerQuiz(room_id):
+    if 'nickname' not in session:
+        flash('Please, join the room first', 'warning')
+        return redirect(url_for('home'))
+
     room = db.rooms.find_one({"_id": ObjectId(room_id)})
     if room is None:
         flash('Room not found', 'danger')
         return redirect(url_for('home'))
 
     if request.method == 'GET':
-        session['nickname'] = 'guest'
         if db.questions.find_one({"roomId": ObjectId(room_id)}) is None:
             flash('No questions in this room', 'danger')
             return redirect(url_for('home'))
         question = getNextQuestion(room_id)
         if question is None:
             flash('You finished your quiz', 'success')
-            return redirect(url_for('home'))
+            session.pop('nickname', None)
+            return redirect(url_for('results', room_id=room_id))
         return render_template('answerQuiz.html', question=question, room=room)
     else:
         questionId = request.form.get('questionId')
