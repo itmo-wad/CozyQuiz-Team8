@@ -155,7 +155,7 @@ def signup():
         db.users.insert_one({"username": username, "password": generate_password_hash(password),
                              "profile_pic": ''})
         flash('Account Created!', 'success')
-        return redirect('/')
+        return redirect(url_for('login'))
 
 @app.route('/userQuizzes')
 def showUserQuizzes():
@@ -271,7 +271,7 @@ def showRoom(room_id):
         return redirect(url_for('home'))
 
     questions = db.questions.find({"roomId": ObjectId(room_id)})
-    return render_template("room.html", room=room, questions=questions)
+    return render_template("room.html", room=room, joinedUsers=len(room['joined']), questions=questions)
 
 @app.route('/rooms/<string:room_id>/questions/new', methods=['POST', 'GET'])
 def newQuestion(room_id):

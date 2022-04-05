@@ -2,12 +2,13 @@
 {% block content %}
 <div class="card mx-auto border-secondary col-8 mb-4 d-flex p-3">
   <h2 class="text-center mb-4">Room Number: {{room._id}}</h2>
-  <div class="d-flex flex-row-reverse mx-4">
-    <a class="btn btn-secondary mx-2 mt-2 mb-4 text-center" type="button" href="{{url_for('newQuestion', room_id=room._id)}}">
-      Add Question
-    </a>
-    <a class="btn btn-outline-secondary mx-2 mt-2 mb-4 text-center" type="button" href="{{url_for('showRoomResults', room_id=room._id)}}">
+  <div class="d-flex mx-4 align-items-center mb-4">
+    <h5 class="my-auto me-auto text-muted">Joined by {{ joinedUsers }} users</h5>
+    <a class="btn btn-outline-secondary mx-2 my-2 text-center" type="button" href="{{url_for('showRoomResults', room_id=room._id)}}">
       Get Results
+    </a>
+    <a class="btn btn-secondary mx-2 my-2 text-center" type="button" href="{{url_for('newQuestion', room_id=room._id)}}">
+      Add Question
     </a>
   </div>
   {% for question in questions %}
